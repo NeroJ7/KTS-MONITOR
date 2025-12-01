@@ -4,8 +4,8 @@ import {
   Power, ChevronRight, Activity, Map, ArrowLeft,
   LayoutGrid, Wrench, Save, Download, Phone, Mail, MapPin, Search, X,
   User, Database, PenTool, Layout, Globe, LogOut,
-  ZoomIn, ZoomOut, Maximize, CheckSquare
-} from 'lucide-react';
+  ZoomIn, ZoomOut, Maximize, CheckSquare, Menu 
+} from 'lucide-react'; // 注意这里添加了 Menu
 import { Gauge } from './components/Gauge';
 import { AlarmModal } from './components/AlarmModal';
 import { ViewState, Alarm, EquipmentData, SystemParameters, MaintenanceEntry } from './types';
@@ -580,27 +580,34 @@ function MapVisual() {
     );
 }
 
-function Header({ onNavigateHome, currentTime, language, setLanguage }: any) {
+function Header({ onNavigateHome, currentTime, language, setLanguage, onToggleMenu }: any) {
     const [showLangMenu, setShowLangMenu] = useState(false);
     const t = TRANSLATIONS[language as keyof typeof TRANSLATIONS];
 
     return (
-    <header className="bg-[#001F3F] text-white h-16 flex items-center justify-between px-4 border-b-4 border-[#00A8E8] shadow-xl shrink-0 z-50">
-      <div className="flex items-center gap-4">
-        <button onClick={onNavigateHome} className="hover:bg-white/10 p-2 rounded transition-colors">
+    <header className="bg-[#001F3F] text-white h-16 flex items-center justify-between px-4 border-b-4 border-[#00A8E8] shadow-xl shrink-0 z-50 sticky top-0">
+      <div className="flex items-center gap-3">
+        {/* 手机端菜单按钮 */}
+        <button onClick={onToggleMenu} className="md:hidden p-2 hover:bg-white/10 rounded text-white">
+            <Menu size={24} />
+        </button>
+        
+        <button onClick={onNavigateHome} className="hover:bg-white/10 p-2 rounded transition-colors hidden md:block">
             <Home size={26} className="text-[#00A8E8]" />
         </button>
-        <KTSLogo color="text-white" />
+        <div className="scale-90 origin-left">
+             <KTSLogo color="text-white" />
+        </div>
       </div>
 
-      <div className="absolute left-1/2 transform -translate-x-1/2 bg-[#001F3F] px-8 py-1 rounded-b-xl border-b border-l border-r border-gray-700 shadow-lg">
+      <div className="absolute left-1/2 transform -translate-x-1/2 bg-[#001F3F] px-8 py-1 rounded-b-xl border-b border-l border-r border-gray-700 shadow-lg hidden lg:block">
          <span className="text-lg font-bold text-gray-200 tracking-wider">
              {t.systemTitle}
          </span>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="text-sm font-mono text-[#00A8E8] bg-black/30 px-3 py-1 rounded border border-gray-700 shadow-inner min-w-[160px] text-center">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="text-sm font-mono text-[#00A8E8] bg-black/30 px-2 sm:px-3 py-1 rounded border border-gray-700 shadow-inner min-w-[80px] sm:min-w-[160px] text-center text-xs sm:text-sm">
             {currentTime}
         </div>
         <div className="relative">
@@ -609,7 +616,7 @@ function Header({ onNavigateHome, currentTime, language, setLanguage }: any) {
                 onClick={() => setShowLangMenu(!showLangMenu)}
             >
                 <Globe size={16} className="text-gray-400"/>
-                <div className="w-8 h-5 relative overflow-hidden border border-white shadow-sm">
+                <div className="w-6 h-4 sm:w-8 sm:h-5 relative overflow-hidden border border-white shadow-sm">
                     {language === 'zh' ? (
                         <img src="https://flagcdn.com/w40/cn.png" className="w-full h-full object-cover" alt="CN"/>
                     ) : (
@@ -663,8 +670,9 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
     const t = TRANSLATIONS[language as keyof typeof TRANSLATIONS];
 
     return (
-    <div className="flex h-screen bg-gray-100 font-sans text-slate-800 overflow-hidden">
-       <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 gap-8 shadow-sm z-10 relative">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100 font-sans text-slate-800 overflow-hidden">
+       {/* 电脑端左侧边栏 - 手机隐藏 */}
+       <div className="hidden md:flex w-20 bg-white border-r border-gray-200 flex-col items-center py-6 gap-8 shadow-sm z-10 relative">
            <div className="scale-75 origin-center"><KTSLogo /></div>
            
            <button className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#00509E] transition-colors group">
@@ -706,15 +714,24 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
            </div>
        </div>
 
-       <div className="flex-1 overflow-y-auto bg-[#F8FAFC] p-6">
-          <div className="max-w-5xl mx-auto space-y-8">
+       {/* 手机端头部 */}
+       <div className="md:hidden bg-white p-3 flex justify-between items-center shadow-sm z-20">
+           <div className="scale-75 origin-left"><KTSLogo /></div>
+           <button onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')} className="p-1">
+               <img src={language === 'zh' ? "https://flagcdn.com/w40/cn.png" : "https://flagcdn.com/w40/gb.png"} className="h-5 rounded shadow" alt="Lang"/>
+           </button>
+       </div>
+
+       {/* 主内容区域 */}
+       <div className="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 md:p-6 pb-20 md:pb-6">
+          <div className="max-w-5xl mx-auto space-y-6 md:space-y-8">
               
               <div className="flex justify-between items-center">
-                  <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                      <span className="bg-[#00509E] w-2 h-8 rounded-full"></span>
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                      <span className="bg-[#00509E] w-2 h-6 md:h-8 rounded-full"></span>
                       {t.monitorCenter}
                   </h1>
-                  <div className="flex gap-2 relative">
+                  <div className="hidden md:flex gap-2 relative">
                       <button onClick={() => setLanguage(language === 'en' ? 'zh' : 'en')} className="hover:opacity-80 transition-opacity">
                         <img src={language === 'zh' ? "https://flagcdn.com/w40/cn.png" : "https://flagcdn.com/w40/gb.png"} className="h-6 rounded shadow" alt="Lang"/>
                       </button>
@@ -722,25 +739,26 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
               </div>
 
               <div 
-                className="relative h-64 rounded-3xl overflow-hidden shadow-2xl cursor-pointer group bg-gradient-to-r from-sky-400 via-[#00A8E8] to-[#00509E]"
+                className="relative h-48 md:h-64 rounded-3xl overflow-hidden shadow-2xl cursor-pointer group bg-gradient-to-r from-sky-400 via-[#00A8E8] to-[#00509E]"
                 onClick={() => setCurrentView(ViewState.DASHBOARD)}
               >
                   <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-                  <div className="absolute inset-0 p-10 flex flex-col justify-center text-white">
-                      <div className="bg-white/20 backdrop-blur w-fit px-4 py-1 rounded-full text-xs font-bold uppercase mb-4 border border-white/30">VALLIANZ HOPE</div>
-                      <h2 className="text-4xl font-bold mb-4 flex items-center gap-3">
+                  <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-center text-white">
+                      <div className="bg-white/20 backdrop-blur w-fit px-4 py-1 rounded-full text-xs font-bold uppercase mb-2 md:mb-4 border border-white/30">VALLIANZ HOPE</div>
+                      <h2 className="text-2xl md:text-4xl font-bold mb-2 md:mb-4 flex items-center gap-3">
                           {t.reportCenter} <div className="bg-red-500 text-xs px-2 py-1 rounded-full animate-pulse">8 {t.newAlerts}</div>
                       </h2>
-                      <p className="max-w-lg text-lg opacity-90 mb-8 font-light">
+                      <p className="max-w-lg text-sm md:text-lg opacity-90 mb-4 md:mb-8 font-light line-clamp-2 md:line-clamp-none">
                           {t.bannerDesc}
                       </p>
-                      <button className="bg-[#F59E0B] text-black px-8 py-3 rounded-xl font-bold w-max hover:bg-[#D97706] transition-colors shadow-lg flex items-center gap-2">
+                      <button className="bg-[#F59E0B] text-black px-4 py-2 md:px-8 md:py-3 rounded-xl font-bold w-max hover:bg-[#D97706] transition-colors shadow-lg flex items-center gap-2 text-sm md:text-base">
                           {t.readReports} <ChevronRight size={18}/>
                       </button>
                   </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {/* 统计卡片：手机端 2 列，电脑端 5 列 */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6">
                   {[
                       { val: 5, label: t.statAlarm, color: "bg-orange-500", text: "text-white", view: ViewState.ALARM_HISTORY },
                       { val: 2, label: t.statMaint, color: "bg-yellow-400", text: "text-slate-900", view: ViewState.MAINTENANCE_RECORD },
@@ -750,16 +768,16 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
                   ].map((stat, idx) => (
                       <div 
                         key={idx} 
-                        className={`${stat.color} ${stat.text} rounded-2xl p-6 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-1 transition-transform cursor-pointer hover:shadow-xl active:scale-95`}
+                        className={`${stat.color} ${stat.text} rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center shadow-lg transform hover:-translate-y-1 transition-transform cursor-pointer hover:shadow-xl active:scale-95`}
                         onClick={() => stat.view ? setCurrentView(stat.view) : alert("No items in this category.")}
                       >
-                          <span className="text-5xl font-black mb-2">{stat.val}</span>
-                          <span className="text-xs font-bold uppercase text-center leading-tight tracking-wide">{stat.label}</span>
+                          <span className="text-3xl md:text-5xl font-black mb-2">{stat.val}</span>
+                          <span className="text-[10px] md:text-xs font-bold uppercase text-center leading-tight tracking-wide">{stat.label}</span>
                       </div>
                   ))}
               </div>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100">
                   <div className="relative mb-6">
                       <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
                       <input type="text" placeholder={t.searchPlaceholder} className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#00509E] transition-all" />
@@ -769,16 +787,15 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
                   <div className="space-y-4">
                       <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-4">{t.recentAlerts}</h3>
                       {alarmHistory.slice(0, 3).map((alarm: Alarm, idx: number) => {
-                          // Lookup translated message
                           const msg = t.alarms[alarm.code as keyof typeof t.alarms] || alarm.message;
                           return (
                           <div 
                              key={idx} 
                              onClick={() => setCurrentView(ViewState.ALARM_HISTORY)}
-                             className="group flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-red-100 hover:bg-red-50 transition-colors cursor-pointer"
+                             className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-red-100 hover:bg-red-50 transition-colors cursor-pointer gap-3 sm:gap-0"
                           >
                               <div className="flex items-center gap-4">
-                                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500">
+                                  <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 shrink-0">
                                       <AlertCircle size={20} />
                                   </div>
                                   <div>
@@ -786,8 +803,8 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
                                       <div className="text-xs text-gray-400">{alarm.timestamp}</div>
                                   </div>
                               </div>
-                              <div className="text-sm font-medium text-gray-600 max-w-md truncate">{msg}</div>
-                              <ChevronRight size={18} className="text-gray-300 group-hover:text-red-400" />
+                              <div className="text-sm font-medium text-gray-600 max-w-md truncate w-full sm:w-auto pl-14 sm:pl-0">{msg}</div>
+                              <ChevronRight size={18} className="text-gray-300 group-hover:text-red-400 hidden sm:block" />
                           </div>
                       )})}
                       
@@ -802,6 +819,22 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
 
           </div>
        </div>
+        
+       {/* 手机端底部导航栏 */}
+       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+           <button onClick={() => setCurrentView(ViewState.DASHBOARD)} className="flex flex-col items-center p-2 text-[#00509E]">
+               <LayoutGrid size={24} />
+               <span className="text-[10px] font-bold mt-1">{t.onlineMonitor}</span>
+           </button>
+           <button onClick={() => setCurrentView(ViewState.REMOTE_CONTROL)} className="flex flex-col items-center p-2 text-gray-500 hover:text-[#00509E]">
+               <Power size={24} />
+               <span className="text-[10px] font-bold mt-1">{t.remoteControl}</span>
+           </button>
+           <button onClick={() => setCurrentView(ViewState.ALARM_HISTORY)} className="flex flex-col items-center p-2 text-gray-500 hover:text-[#00509E]">
+               <AlertCircle size={24} />
+               <span className="text-[10px] font-bold mt-1">{t.statAlarm}</span>
+           </button>
+       </div>
     </div>
   );
 }
@@ -809,47 +842,37 @@ function LandingView({ setCurrentView, alarmHistory, language, setLanguage }: an
 function DashboardView({ data, activeAlarm, setActiveAlarm, language }: any) {
     const t = TRANSLATIONS[language as keyof typeof TRANSLATIONS];
 
-    // =========================================================================
-    // 💡 1. 复制并定义反向线性映射函数：将 [-70, 43] 反向映射到 [150, 30]
-    //    确保显示值与 RemoteControlView 同步。
-    // =========================================================================
-    const mapKnuckleAngle = (knuckleAngle) => {
-        const inMin = -70;   // 原始数据的最小值 (对应显示 150°)
-        const inMax = 43;    // 原始数据的最大值 (对应显示 30°)
-        const outMin = 150;  // 目标显示值 (当原始值为 inMin 时)
-        const outMax = 30;   // 目标显示值 (当原始值为 inMax 时)
-
-        const inputRange = inMax - inMin; // 113
-        const outputRange = outMax - outMin; // -120
-        
+    const mapKnuckleAngle = (knuckleAngle: number) => {
+        const inMin = -70;   
+        const inMax = 43;    
+        const outMin = 150;  
+        const outMax = 30;   
+        const inputRange = inMax - inMin; 
+        const outputRange = outMax - outMin; 
         if (inputRange === 0) return outMin;
-
-        // 线性映射公式: OutMin + OutputRange * (InputValue - InMin) / InputRange
         const mappedAngle = outMin + outputRange * (knuckleAngle - inMin) / inputRange;
-
-        // 限制结果在 [30, 150] 范围内
         return Math.min(Math.max(mappedAngle, outMax), outMin); 
     };
 
-    // 💡 2. 计算要显示给 CraneVisual 的折臂角度
     const displayKnuckleAngle = mapKnuckleAngle(data.knuckleAngle);
 
-
     return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-1 h-full bg-[#001F3F] p-2">
-      <div className="col-span-full lg:col-span-3 bg-[#002B55]/80 border border-slate-600 rounded-lg p-2 flex flex-col gap-2 shadow-inner">
+    // 关键修改：允许滚动 (h-auto md:h-full)
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 h-auto md:h-full bg-[#001F3F] p-2 overflow-y-auto">
+      {/* 左侧面板：手机上自适应高度 */}
+      <div className="col-span-full lg:col-span-3 bg-[#002B55]/80 border border-slate-600 rounded-lg p-2 flex flex-col gap-2 shadow-inner shrink-0">
         <div className="grid grid-cols-2 gap-2">
-          <div className="bg-[#0f172a] rounded p-2 border border-slate-700 shadow-lg relative">
+          <div className="bg-[#0f172a] rounded p-2 border border-slate-700 shadow-lg relative aspect-square lg:aspect-auto lg:h-32 flex items-center justify-center">
              <div className="absolute top-1 left-2 text-[10px] text-gray-400 font-bold uppercase">{t.oilTemp}</div>
-             <Gauge value={data.oilTemp} min={0} max={120} label="TEMP" unit="°C" color={data.oilTemp > 90 ? "#ef4444" : "#00A8E8"} /> {/* 假设 Gauge 组件已定义 */}
+             <Gauge value={data.oilTemp} min={0} max={120} label="TEMP" unit="°C" color={data.oilTemp > 90 ? "#ef4444" : "#00A8E8"} /> 
           </div>
-          <div className="bg-[#0f172a] rounded p-2 border border-slate-700 shadow-lg relative">
+          <div className="bg-[#0f172a] rounded p-2 border border-slate-700 shadow-lg relative aspect-square lg:aspect-auto lg:h-32 flex items-center justify-center">
              <div className="absolute top-1 left-2 text-[10px] text-gray-400 font-bold uppercase">{t.windSpeed}</div>
              <Gauge value={data.windSpeed} min={0} max={40} label="SPEED" unit="m/s" color={data.windSpeed > 20 ? "#eab308" : "#22c55e"} />
           </div>
         </div>
 
-        <div className="flex-1 bg-[#0f172a] rounded border border-slate-700 p-1 overflow-auto">
+        <div className="flex-1 bg-[#0f172a] rounded border border-slate-700 p-1 overflow-auto max-h-[300px] lg:max-h-none">
            <table className="w-full text-xs text-left border-collapse">
              <tbody>
                {[
@@ -870,24 +893,24 @@ function DashboardView({ data, activeAlarm, setActiveAlarm, language }: any) {
         </div>
       </div>
 
-      <div className="col-span-full lg:col-span-9 flex flex-col gap-2 h-full overflow-hidden">
-           <div className="flex-[3] min-h-0 bg-black rounded-lg border border-slate-600 relative overflow-hidden group">
+      {/* 右侧可视化：手机上垂直堆叠，指定高度 */}
+      <div className="col-span-full lg:col-span-9 flex flex-col gap-2 h-auto md:h-full min-h-[500px] md:min-h-0">
+           <div className="w-full h-[350px] md:h-auto md:flex-[3] min-h-0 bg-black rounded-lg border border-slate-600 relative overflow-hidden group shrink-0">
              <CraneVisual 
                  angle={data.mainAngle} 
                  ropeLength={data.ropeLength} 
                  activeAlarm={!!activeAlarm}
-                 knuckleAngle={data.knuckleAngle} // 动画使用原始值
+                 knuckleAngle={data.knuckleAngle} 
                  slewAngle={data.slewAngle}
                  viewMode="SIDE"
                  weight={data.liftingWeight}
                  speed={data.speed}
-                 // 💡 3. 将映射后的角度传递给 CraneVisual 用于显示
                  displayKnuckleAngle={displayKnuckleAngle} 
              />
            </div>
            
-           <div className="flex-[2] min-h-0 bg-black rounded-lg border border-slate-600 relative overflow-hidden">
-              <MapVisual /> {/* 假设 MapVisual 组件已定义 */}
+           <div className="w-full h-[200px] md:h-auto md:flex-[2] min-h-0 bg-black rounded-lg border border-slate-600 relative overflow-hidden shrink-0">
+              <MapVisual /> 
            </div>
       </div>
     </div>
@@ -900,61 +923,34 @@ function RemoteControlView({ data, params, activeAlarm, setActiveControl, clearA
     const [viewMode, setViewMode] = useState<'SIDE' | 'TOP'>('SIDE');
     const [zoom, setZoom] = useState(1);
 
-    // =========================================================================
-    // 💡 修正后的线性映射函数：将 [-70, 43] 反向映射到 [150, 30]
-    // =========================================================================
-    const mapKnuckleAngle = (knuckleAngle) => {
-        const inMin = -70;   // 原始数据的最小值 (对应折臂伸出)
-        const inMax = 43;    // 原始数据的最大值 (对应折臂收回)
-        const outMin = 150;  // 目标显示的值：当原始值为 inMin 时显示 150°
-        const outMax = 30;   // 目标显示的值：当原始值为 inMax 时显示 30°
-
-        const inputRange = inMax - inMin; // 43 - (-70) = 113
-        const outputRange = outMax - outMin; // 30 - 150 = -120
-        
-        // 确保分母不为零
+    const mapKnuckleAngle = (knuckleAngle: number) => {
+        const inMin = -70;   
+        const inMax = 43;    
+        const outMin = 150;  
+        const outMax = 30;   
+        const inputRange = inMax - inMin; 
+        const outputRange = outMax - outMin; 
         if (inputRange === 0) return outMin;
-
-        // 线性映射公式: OutMin + OutputRange * (InputValue - InMin) / InputRange
         const mappedAngle = outMin + outputRange * (knuckleAngle - inMin) / inputRange;
-
-        // 限制结果在 [30, 150] 范围内 (注意这里取 min 和 max 的顺序)
         return Math.min(Math.max(mappedAngle, outMax), outMin); 
-        // 解释：Math.max(mappedAngle, 30) 确保不小于30
-        //       Math.min(..., 150) 确保不大于150
     };
 
-    // 计算要显示给用户的折臂角度
     const displayKnuckleAngle = mapKnuckleAngle(data.knuckleAngle);
     
-    // Common props for control buttons - Updated for Auto View Switching
     const btnProps = (action: string) => ({
         onMouseDown: () => {
             setActiveControl(action);
-            if (['SLEW_CCW', 'SLEW_CW'].includes(action)) {
-                setViewMode('TOP');
-            } else {
-                setViewMode('SIDE');
-            }
+            if (['SLEW_CCW', 'SLEW_CW'].includes(action)) { setViewMode('TOP'); } else { setViewMode('SIDE'); }
         },
         onMouseUp: () => setActiveControl(null),
         onMouseLeave: () => setActiveControl(null),
-		// ===================================
-    // 关键修复 1: 增加触控事件支持
-    // ===================================
-    onTouchStart: (e: React.TouchEvent) => {
-        // 阻止默认行为（如移动端缩放或滚动），确保操作专一性
-        e.preventDefault(); 
-        setActiveControl(action);
-        if (['SLEW_CCW', 'SLEW_CW'].includes(action)) { 
-            setViewMode('TOP'); 
-        } else { 
-            setViewMode('SIDE'); 
-        } 
-    },
-    onTouchEnd: () => setActiveControl(null),
-    onTouchCancel: () => setActiveControl(null), // 触控中断时停止操作
-    // ===================================
+        onTouchStart: (e: React.TouchEvent) => {
+            e.preventDefault(); 
+            setActiveControl(action);
+            if (['SLEW_CCW', 'SLEW_CW'].includes(action)) { setViewMode('TOP'); } else { setViewMode('SIDE'); } 
+        },
+        onTouchEnd: () => setActiveControl(null),
+        onTouchCancel: () => setActiveControl(null),
         className: "absolute z-20 cursor-pointer active:bg-white/20 transition-colors"
     });
 
@@ -963,92 +959,66 @@ function RemoteControlView({ data, params, activeAlarm, setActiveControl, clearA
     const handleResetZoom = () => setZoom(1);
 
     return (
-    <div className="h-full flex flex-col bg-gray-300 p-4 rounded relative overflow-hidden">
-        <div className="bg-white p-2 flex justify-between items-center border-b border-gray-400 mb-4 rounded shadow-sm">
-            <div className="flex items-center gap-4">
-               <div className="flex items-center">
-                   <KTSLogo /> {/* 假设 KTSLogo 是已定义的组件 */}
-               </div>
-               <div className="h-6 w-px bg-gray-300"></div>
-               <div className="font-mono font-bold text-lg">{new Date().toLocaleString()}</div>
+    // 修改为 min-h-full 并允许滚动，适应手机长页面
+    <div className="h-full flex flex-col bg-gray-300 p-2 sm:p-4 rounded relative overflow-hidden overflow-y-auto">
+        <div className="bg-white p-2 flex justify-between items-center border-b border-gray-400 mb-2 sm:mb-4 rounded shadow-sm shrink-0">
+            <div className="flex items-center gap-2 sm:gap-4">
+               <div className="scale-75 origin-left sm:scale-100"><KTSLogo /></div>
+               <div className="hidden sm:block h-6 w-px bg-gray-300"></div>
+               <div className="font-mono font-bold text-xs sm:text-lg">{new Date().toLocaleString()}</div>
             </div>
-            {/* Clear Button with Functionality */}
             <button 
-                className="bg-gray-700 text-white px-3 py-1 text-xs rounded uppercase font-bold hover:bg-gray-800 active:scale-95 transition-transform"
+                className="bg-gray-700 text-white px-2 py-1 text-xs rounded uppercase font-bold hover:bg-gray-800 active:scale-95 transition-transform"
                 onClick={clearAlarm}
             >
                 {t.clear}
             </button>
         </div>
 
-        {/* SWAPPED: Visual Display Area is now flex-1 (Large) */}
-        <div className="flex-1 bg-gradient-to-b from-gray-200 to-gray-300 border border-gray-400 p-4 rounded-lg mb-4 flex justify-between items-center shadow-inner min-h-0 relative">
-            {/* Visual Container */}
-            <div className="flex-1 h-full mx-4 bg-white/50 rounded border border-gray-300 flex items-center justify-center overflow-hidden relative">
+        {/* 视图区域：手机上固定高度，电脑上自适应 */}
+        <div className="h-[250px] sm:h-auto sm:flex-1 bg-gradient-to-b from-gray-200 to-gray-300 border border-gray-400 p-2 sm:p-4 rounded-lg mb-2 sm:mb-4 flex justify-between items-center shadow-inner min-h-0 relative shrink-0">
+            <div className="flex-1 h-full mx-0 sm:mx-4 bg-white/50 rounded border border-gray-300 flex items-center justify-center overflow-hidden relative">
                 <CraneVisual 
                     angle={data.mainAngle} 
                     ropeLength={data.ropeLength} 
                     activeAlarm={!!activeAlarm} 
-                    knuckleAngle={data.knuckleAngle} // 保持原始值不变，用于动画计算
+                    knuckleAngle={data.knuckleAngle} 
                     slewAngle={data.slewAngle}
                     viewMode={viewMode}
                     weight={data.liftingWeight}
                     speed={data.speed}
                     zoom={zoom}
-                    // 💡 传递修正后的映射角度用于显示
                     displayKnuckleAngle={displayKnuckleAngle} 
                 />
 
-                {/* Zoom Controls Overlay */}
-                <div className="absolute right-4 top-4 flex flex-col gap-2 z-20 bg-black/40 p-2 rounded-lg backdrop-blur-sm border border-white/20">
-                    <button 
-                        onClick={handleZoomIn} 
-                        className="bg-white/90 hover:bg-white text-gray-800 p-1.5 rounded shadow transition-transform active:scale-95"
-                        title={t.zoomIn}
-                    >
-                        <ZoomIn size={18} /> {/* 假设 ZoomIn 是已定义的图标组件 */}
-                    </button>
-                    <button 
-                        onClick={handleResetZoom} 
-                        className="bg-white/90 hover:bg-white text-gray-800 p-1.5 rounded shadow transition-transform active:scale-95"
-                        title={t.zoomReset}
-                    >
-                        <Maximize size={18} /> {/* 假设 Maximize 是已定义的图标组件 */}
-                    </button>
-                    <button 
-                        onClick={handleZoomOut} 
-                        className="bg-white/90 hover:bg-white text-gray-800 p-1.5 rounded shadow transition-transform active:scale-95"
-                        title={t.zoomOut}
-                    >
-                        <ZoomOut size={18} /> {/* 假设 ZoomOut 是已定义的图标组件 */}
-                    </button>
-                    <div className="text-[10px] font-bold text-white text-center mt-1 font-mono">
-                        {Math.round(zoom * 100)}%
-                    </div>
+                <div className="absolute right-2 top-2 sm:right-4 sm:top-4 flex flex-col gap-2 z-20 bg-black/40 p-2 rounded-lg backdrop-blur-sm border border-white/20">
+                    <button onClick={handleZoomIn} className="bg-white/90 p-1.5 rounded shadow active:scale-95"><ZoomIn size={16} /></button>
+                    <button onClick={handleResetZoom} className="bg-white/90 p-1.5 rounded shadow active:scale-95"><Maximize size={16} /></button>
+                    <button onClick={handleZoomOut} className="bg-white/90 p-1.5 rounded shadow active:scale-95"><ZoomOut size={16} /></button>
                 </div>
 
                 {activeAlarm && (
-                    <div className="absolute inset-x-10 top-2 bg-red-600 text-white text-center p-1 text-xs font-bold animate-pulse shadow-lg border-2 border-yellow-400 z-10">
+                    <div className="absolute inset-x-4 top-2 bg-red-600 text-white text-center p-1 text-xs font-bold animate-pulse shadow-lg border-2 border-yellow-400 z-10">
                         {alarmMsg}
                     </div>
                 )}
             </div>
-            {/* Removed right panel, merged into Visual */}
         </div>
 
-        {/* SWAPPED: Controls Area is now fixed height (Smaller) */}
-        <div className="h-72 bg-[#4b5563] rounded-xl p-6 flex items-center justify-center relative shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] shrink-0">
-            <div className="w-full max-w-4xl grid grid-cols-3 gap-12">
+        {/* 控制区域：手机上垂直排列，电脑上水平网格 */}
+        <div className="h-auto bg-[#4b5563] rounded-xl p-4 flex items-center justify-center relative shadow-[inset_0_0_20px_rgba(0,0,0,0.5)] shrink-0">
+            <div className="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-12">
                 
-                <div className="flex flex-col items-center">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 bg-[#1f2937] rounded-full border-4 border-gray-600 shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center">
+                {/* 左摇杆 */}
+                <div className="flex flex-col items-center transform scale-90 sm:scale-100">
+                    <div className="relative w-32 h-32 sm:w-40 sm:h-40 bg-[#1f2937] rounded-full border-4 border-gray-600 shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center">
                         <span className="absolute top-4 text-[9px] text-gray-400 font-bold uppercase pointer-events-none">{t.luffingDw}</span>
                         <span className="absolute bottom-4 text-[9px] text-gray-400 font-bold uppercase pointer-events-none">{t.luffingUp}</span>
                         <span className="absolute left-0 text-[9px] text-gray-400 font-bold uppercase w-12 text-center leading-3 whitespace-pre-line pointer-events-none">{t.slewingCcw}</span>
                         <span className="absolute right-0 text-[9px] text-gray-400 font-bold uppercase w-12 text-center leading-3 whitespace-pre-line pointer-events-none">{t.slewingCw}</span>
 
-                        <div className="w-20 h-20 bg-gradient-to-b from-gray-600 to-gray-800 rounded-full shadow-[0_5px_10px_rgba(0,0,0,0.5),inset_0_2px_5px_rgba(255,255,255,0.2)] flex items-center justify-center relative z-10 pointer-events-none">
-                            <div className="w-14 h-14 bg-gradient-to-tr from-red-900 to-red-600 rounded-full border-2 border-red-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]"></div>
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-b from-gray-600 to-gray-800 rounded-full shadow-[0_5px_10px_rgba(0,0,0,0.5),inset_0_2px_5px_rgba(255,255,255,0.2)] flex items-center justify-center relative z-10 pointer-events-none">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-tr from-red-900 to-red-600 rounded-full border-2 border-red-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]"></div>
                         </div>
 
                         <button {...btnProps('LUFF_DOWN')} className="absolute top-0 w-full h-1/3 z-20 active:bg-white/10 rounded-t-full" />
@@ -1058,7 +1028,8 @@ function RemoteControlView({ data, params, activeAlarm, setActiveControl, clearA
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-center gap-4">
+                {/* 中间按钮组 */}
+                <div className="flex flex-col items-center justify-center gap-4 order-last sm:order-none">
                     <div className="flex gap-4 mb-2">
                         {[1,2,3].map(i => (
                             <div key={i} className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-500 shadow flex items-center justify-center">
@@ -1082,19 +1053,19 @@ function RemoteControlView({ data, params, activeAlarm, setActiveControl, clearA
                         >
                             {t.side}
                         </button>
-                         <button className="flex-1 bg-red-600 text-white text-[10px] font-bold py-2 rounded border-b-4 border-red-800 active:border-0 active:mt-1">{t.exit}</button>
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center">
-                    <div className="relative w-32 h-32 md:w-40 md:h-40 bg-[#1f2937] rounded-full border-4 border-gray-600 shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center">
+                {/* 右摇杆 */}
+                <div className="flex flex-col items-center transform scale-90 sm:scale-100">
+                    <div className="relative w-32 h-32 sm:w-40 sm:h-40 bg-[#1f2937] rounded-full border-4 border-gray-600 shadow-[0_10px_20px_rgba(0,0,0,0.5)] flex items-center justify-center">
                         <span className="absolute top-4 text-[9px] text-gray-400 font-bold uppercase pointer-events-none">{t.hoistingDw}</span>
                         <span className="absolute bottom-4 text-[9px] text-gray-400 font-bold uppercase pointer-events-none">{t.hoistingUp}</span>
                         <span className="absolute left-0 text-[9px] text-gray-400 font-bold uppercase w-12 text-center leading-3 whitespace-pre-line pointer-events-none">{t.knuckleIn}</span>
                         <span className="absolute right-0 text-[9px] text-gray-400 font-bold uppercase w-12 text-center leading-3 whitespace-pre-line pointer-events-none">{t.knuckleOut}</span>
 
-                         <div className="w-20 h-20 bg-gradient-to-b from-gray-600 to-gray-800 rounded-full shadow-[0_5px_10px_rgba(0,0,0,0.5),inset_0_2px_5px_rgba(255,255,255,0.2)] flex items-center justify-center relative z-10 pointer-events-none">
-                            <div className="w-14 h-14 bg-gradient-to-tr from-red-900 to-red-600 rounded-full border-2 border-red-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]"></div>
+                         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-b from-gray-600 to-gray-800 rounded-full shadow-[0_5px_10px_rgba(0,0,0,0.5),inset_0_2px_5px_rgba(255,255,255,0.2)] flex items-center justify-center relative z-10 pointer-events-none">
+                            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-tr from-red-900 to-red-600 rounded-full border-2 border-red-400 shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]"></div>
                         </div>
 
                         <button {...btnProps('HOIST_DOWN')} className="absolute top-0 w-full h-1/3 z-20 active:bg-white/10 rounded-t-full" />
@@ -1562,92 +1533,114 @@ function HelpView({ setCurrentView, language }: any) {
 
 function SystemLayout({ children, title, currentView, setCurrentView, currentTime, data, setData, language, setLanguage }: any) {
     const t = TRANSLATIONS[language as keyof typeof TRANSLATIONS];
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     return (
-    <div className="flex flex-col h-screen bg-gray-900 overflow-hidden font-sans select-none">
-      <Header onNavigateHome={() => setCurrentView(ViewState.LANDING)} currentTime={currentTime} language={language} setLanguage={setLanguage} />
+    <div className="flex flex-col h-screen md:min-h-screen bg-gray-900 overflow-hidden font-sans select-none relative">
+      <Header 
+          onNavigateHome={() => setCurrentView(ViewState.LANDING)} 
+          currentTime={currentTime} 
+          language={language} 
+          setLanguage={setLanguage}
+          onToggleMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      />
       
       <div className="flex flex-1 overflow-hidden relative bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
         
-        {/* Main Content Area */}
-        <main className="flex-1 p-2 md:mr-[200px] relative flex flex-col h-full overflow-hidden">
-            {/* Top Bar for View Title */}
-            <div className="bg-gradient-to-r from-[#00A8E8]/80 to-transparent text-white px-4 py-2 mb-2 rounded-l border-l-4 border-white shadow-lg flex justify-between items-center shrink-0">
+        {/* 主内容区域 */}
+        <main className="flex-1 p-2 md:mr-[200px] relative flex flex-col h-full overflow-hidden w-full">
+            {/* 顶部标题栏 */}
+            <div className="bg-gradient-to-r from-[#00A8E8]/80 to-transparent text-white px-3 py-2 mb-2 rounded border-l-4 border-white shadow-lg flex justify-between items-center shrink-0">
                   <div className="flex items-center gap-2">
                      <div className="bg-white p-1 rounded text-[#00A8E8]"><LayoutGrid size={16}/></div>
-                     <h2 className="text-lg font-bold uppercase">{title}</h2>
+                     <h2 className="text-sm sm:text-lg font-bold uppercase truncate max-w-[150px] sm:max-w-none">{title}</h2>
                   </div>
                   
-                  {/* Equipment Selector */}
-                  <div className="flex items-center gap-2 bg-black/40 px-3 py-1 rounded border border-white/20">
-                    <span className="text-[10px] text-gray-300 uppercase font-bold tracking-wider">{t.equipmentList}</span>
+                  <div className="flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-white/20">
+                    <span className="text-[10px] text-gray-300 uppercase font-bold tracking-wider hidden sm:inline">{t.equipmentList}</span>
                     <select 
-                        className="bg-transparent text-[#00A8E8] font-bold outline-none text-sm cursor-pointer [&>option]:bg-gray-800"
+                        className="bg-transparent text-[#00A8E8] font-bold outline-none text-xs sm:text-sm cursor-pointer [&>option]:bg-gray-800"
                         onChange={(e) => setData((prev: any) => ({...prev, model: e.target.value}))}
                         value={data.model}
                     >
                       <option value="5T MODEL">{t.crane5T}</option>
                       <option value="15T MODEL">{t.crane15T}</option>
                     </select>
-                    <ChevronRight size={14} className="text-gray-400" />
                   </div>
             </div>
             
+            {/* 内容容器 */}
             <div className="flex-1 relative overflow-hidden rounded-lg border border-gray-700 bg-gray-900/90 shadow-2xl">
                 {children}
             </div>
         </main>
 
-        {/* Right Sidebar */}
-        <aside className="w-[200px] bg-[#1e293b] border-l border-gray-600 p-2 absolute right-0 top-0 bottom-0 shadow-2xl z-10 flex flex-col justify-between">
-            <div className="space-y-1 mt-2">
+        {/* 侧边栏：手机端为抽屉式，电脑端固定 */}
+        <aside className={`
+            fixed inset-y-0 right-0 z-50 w-64 bg-[#1e293b] border-l border-gray-600 p-2 shadow-2xl transition-transform duration-300 transform
+            ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}
+            md:translate-x-0 md:w-[200px] md:absolute md:top-0 md:bottom-0 md:flex md:flex-col md:justify-between
+        `}>
+            {/* 手机端菜单关闭按钮 */}
+            <div className="flex justify-between items-center md:hidden mb-4 px-2 pt-2 border-b border-gray-700 pb-2">
+                <span className="text-white font-bold text-lg">Menu</span>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-white bg-gray-800 p-1 rounded"><X size={20} /></button>
+            </div>
+
+            <div className="space-y-1 mt-2 overflow-y-auto flex-1">
                 <SideButton 
                 label={t.remoteControl} 
                 icon={Power} 
                 active={currentView === ViewState.REMOTE_CONTROL} 
-                onClick={() => setCurrentView(ViewState.REMOTE_CONTROL)} 
+                onClick={() => { setCurrentView(ViewState.REMOTE_CONTROL); setIsMobileMenuOpen(false); }} 
                 />
                 <SideButton 
                 label={t.parameterSetting} 
                 icon={Settings} 
                 active={currentView === ViewState.PARAMETER_SETTING} 
-                onClick={() => setCurrentView(ViewState.PARAMETER_SETTING)} 
+                onClick={() => { setCurrentView(ViewState.PARAMETER_SETTING); setIsMobileMenuOpen(false); }} 
                 />
                 <SideButton 
                 label={t.maintenanceRecord} 
                 icon={ClipboardList} 
                 active={currentView === ViewState.MAINTENANCE_RECORD} 
-                onClick={() => setCurrentView(ViewState.MAINTENANCE_RECORD)} 
+                onClick={() => { setCurrentView(ViewState.MAINTENANCE_RECORD); setIsMobileMenuOpen(false); }} 
                 />
                 <SideButton 
                 label={t.repairRecord} 
                 icon={Wrench} 
                 active={currentView === ViewState.REPAIR_RECORD} 
-                onClick={() => setCurrentView(ViewState.REPAIR_RECORD)} 
+                onClick={() => { setCurrentView(ViewState.REPAIR_RECORD); setIsMobileMenuOpen(false); }} 
                 />
                  <SideButton 
                 label={t.statAlarm} 
                 icon={AlertCircle} 
                 active={currentView === ViewState.ALARM_HISTORY} 
-                onClick={() => setCurrentView(ViewState.ALARM_HISTORY)} 
+                onClick={() => { setCurrentView(ViewState.ALARM_HISTORY); setIsMobileMenuOpen(false); }} 
                 />
                 <SideButton 
                 label={t.statTodo} 
                 icon={CheckSquare} 
                 active={currentView === ViewState.TODO_LIST} 
-                onClick={() => setCurrentView(ViewState.TODO_LIST)} 
+                onClick={() => { setCurrentView(ViewState.TODO_LIST); setIsMobileMenuOpen(false); }} 
                 />
             </div>
             
-            <div className="mb-2">
+            <div className="mb-2 mt-auto">
                  <SideButton 
                     label={t.help} 
                     icon={HelpCircle} 
                     active={currentView === ViewState.HELP} 
-                    onClick={() => setCurrentView(ViewState.HELP)} 
+                    onClick={() => { setCurrentView(ViewState.HELP); setIsMobileMenuOpen(false); }} 
                     colorClass="from-slate-700 to-slate-800"
                 />
             </div>
         </aside>
+
+        {/* 手机端遮罩层 */}
+        {isMobileMenuOpen && (
+            <div className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+        )}
       </div>
     </div>
   );
